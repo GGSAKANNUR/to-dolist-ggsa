@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reminders</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; justify-content: center; padding: 50px; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { margin-top: 0; color: #333; text-align: center; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button#addBtn { padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        ul { list-style: none; padding: 0; }
+        li { background: #fff; border: 1px solid #eee; padding: 12px; margin-bottom: 8px; border-left: 5px solid #007bff; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .task-info { display: flex; flex-direction: column; }
+        .task-date { font-size: 0.8rem; color: #666; }
+        
+        .action-area { display: flex; align-items: center; gap: 10px; }
+        .tick-btn { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; display: none; }
+        .done-mark { color: #dc3545; font-weight: bold; font-size: 14px; display: none; }
+        
+        .completed { background-color: #f8f9fa; border-left-color: #6c757d; color: #adb5bd; text-decoration: line-through; }
+        .completed .done-mark, .completed .delete-btn { display: inline; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔔 Reminders</h2>
+    <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Task name...">
+        <input type="date" id="dateInput">
+        <button id="addBtn" onclick="addReminder()">Set Reminder</button>
+    </div>
+    <ul id="reminderList"></ul>
+</div>
+
+<script>
+    function addReminder() {
+        const task = document.getElementById('taskInput').value;
+        const dateStr = document.getElementById('dateInput').value;
+        const list = document.getElementById('reminderList');
+
+        if (!task || !dateStr) {
+            alert("Please fill in both fields!");
+            return;
+        }
+
+        const li = document.createElement('li');
+        let completionDate = null; // To store when "Tick" is clicked
+
+        li.innerHTML = `
+            <div class="task-info">
+                <strong>${task}</strong>
+                <span class="task-date">Due: ${dateStr}</span>
+            </div>
+            <div class="action-area">
+                <button class="tick-btn">Tick</button>
+                <span class="done-mark">Done ✔</span>
+                <button class="delete-btn">Delete</button>
+            </div>
+        `;
+
+        const tickBtn = li.querySelector('.tick-btn');
+        const deleteBtn = li.querySelector('.delete-btn');
+        
+        tickBtn.onclick = function() {
+            if (confirm("Mark as completed? This cannot be undone.")) {
+                li.classList.add('completed');
+                tickBtn.classList.add('hidden');
+                completionDate = new Date(); // Record exact completion time
+            }
+        };
+
+        deleteBtn.onclick = function() {
+            const now = new Date();
+            const daysPast = Math.floor((now - completionDate) / (1000 * 60 * 60 * 24));
+
+            if (daysPast >= 30) {
+                if (confirm("This task is over 30 days old. Delete permanently?")) {
+                    li.remove();
+                }
+            } else {
+                alert(`Cannot delete yet. You must wait 30 days after completion. (${30 - daysPast} days remaining)`);
+            }
+        };
+
+        list.appendChild(li);
+        document.getElementById('taskInput').value = '';
+        document.getElementById('dateInput').value = '';
+    }
+</script>
+
+</body>
+</html>
